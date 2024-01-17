@@ -20,10 +20,10 @@ int main(int argc, char **args) {
 	++gameID;
 	// -------------
 	if (!strstr(buffer, "15")) printf("%s", buffer);
-	  else continue;
+	else continue;
 
 	struct SetSlice setSlice   = { RED, "",  0, 14 };
-	struct Set currentSet			 = { 0, 0, 0 };
+	struct Set currentSet	   = { 0, 0, 0 };
 	struct CubesInBuffer cubes = { 0, 0, 0 };
 
 	int p = 0;
