@@ -1,11 +1,10 @@
-# import <stdio.h>
 # import <string.h>
 # import <stdlib.h>
 
 int askIfCurrIsNumber(int curr);
 
 typedef enum { RED, BLUE, GREEN } CubeType;
- 
+
 struct CubesInBuffer {
 	int reds;
 	int greens;
@@ -99,7 +98,7 @@ struct Set addBlueCubesToSet(struct Set set, int cubes) {
 
 
 struct CubesInBuffer readCurrentSet(struct CubesInBuffer cube) {
-	
+
 }
 
 
