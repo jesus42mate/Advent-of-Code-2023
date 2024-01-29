@@ -13,11 +13,13 @@ int main(int argc, char **args) {
 	fptr = fopen("input.txt", "r");
 	char buffer[160];
 	char nums[9] = "123456789";
+	int total = 0;
 	// ------------
 
 	int gameID = 0;
 	while(fgets(buffer, sizeof(buffer), fptr)) {
 		++gameID;
+		printf("GameID: %d\n", gameID);
 		// -------------
 		if (!strstr(buffer, "15")) printf("%s", buffer);
 		else continue;
@@ -29,7 +31,6 @@ int main(int argc, char **args) {
 		int p = 0;
 		bool started = false;
 		int buffer_length = get_buffer_length(buffer, sizeof(buffer));
-
 		for (int i = 1; i < buffer_length; ++i) {
 			if (buffer[i - 1] == ':') started = true;
 			if (!started)	continue;
@@ -39,9 +40,9 @@ int main(int argc, char **args) {
 
 			setSlice.text[p] = curr;
 			++p;
-			printf("SetSlice so far: %s\n", setSlice.text);
 
 			if (curr == ',' || i == buffer_length - 1) {
+				printf("\tSetSlice: %s\n", setSlice.text);
 				setSlice.len = p;
 				p = 0;
 
@@ -53,21 +54,34 @@ int main(int argc, char **args) {
 
 				// here we check the cube ammount of the setSlice
 				getCubeAmmountFrom(&setSlice);
-				printf(" -> ammount: %d\n", setSlice.cube_ammount);
+				printf(" --> ammount: %d\n", setSlice.cube_ammount);
+
 				if (setSlice.color == RED) {
+					if (setSlice.cube_ammount > MAXREDS) break;
 					currentSet.reds += setSlice.cube_ammount;
 				} else if (setSlice.color == BLUE) {
+					if (setSlice.cube_ammount > MAXBLUES) break;
 					currentSet.blues += setSlice.cube_ammount;
 				} else if (setSlice.color == GREEN) {
+					if (setSlice.cube_ammount > MAXGREENS) break;
 					currentSet.greens += setSlice.cube_ammount;
 				}
 				printf(" -> reds: %d\n", currentSet.reds);
 				printf(" -> blues: %d\n", currentSet.blues);
 				printf(" -> greens: %d\n", currentSet.greens);
 				cleanSlice(&setSlice);
+				if (currentSet.reds > MAXREDS ||
+					currentSet.blues > MAXBLUES ||
+					currentSet.greens > MAXGREENS)
+				{
+					printf("OVERFLOW\n");
+					break;
+				}
 			}
 
 			if (curr == ';') {
+				printf("SetSlice so far: %s\n", setSlice.text);
+				setSlice.len = p;
 				p = 0;
 				// before we clean the setSlice, we want to check
 				// if the set has more cubes than it should
@@ -82,13 +96,16 @@ int main(int argc, char **args) {
 
 				// here we check the cube ammount of the setSlice
 				getCubeAmmountFrom(&setSlice);
-				printf(" -> ammount: %d\n", setSlice.cube_ammount);
+				printf(" --> ammount: %d\n", setSlice.cube_ammount);
 				// ---------------
 				if (setSlice.color == RED) {
+					if (setSlice.cube_ammount > MAXREDS) break;
 					currentSet.reds += setSlice.cube_ammount;
 				} else if (setSlice.color == BLUE) {
+					if (setSlice.cube_ammount > MAXBLUES) break;
 					currentSet.blues += setSlice.cube_ammount;
 				} else if (setSlice.color == GREEN) {
+					if (setSlice.cube_ammount > MAXGREENS) break;
 					currentSet.greens += setSlice.cube_ammount;
 				}
 				printf(" -> reds: %d\n", currentSet.reds);
@@ -98,9 +115,12 @@ int main(int argc, char **args) {
 				cleanSlice(&setSlice);
 				cleanSet(&currentSet);
 			}
+			if (i == buffer_length - 1) {
+				printf("%d + %d = %d\n", total, gameID, total + gameID);
+				total += gameID;
+			}
 		}
-		//printf("%s", buffer);
-		//printf("game ID: %d\n", j);
+		printf("total: %d\n", total);
 	}
 	// ------------
 	fclose(fptr);

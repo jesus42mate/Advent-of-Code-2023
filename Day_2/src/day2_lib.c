@@ -39,6 +39,7 @@ void cleanSlice(struct SetSlice *slice) {
 }
 
 
+# import <stdio.h>
 void getCubeAmmountFrom(struct SetSlice *setSlice) {
 	short j, i;
 	j = 0;
