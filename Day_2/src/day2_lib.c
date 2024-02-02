@@ -7,20 +7,20 @@ typedef enum { RED, BLUE, GREEN } CubeType;
 
 struct CubesInBuffer {
 	int reds;
-	int greens;
 	int blues;
+	int greens;
 };
 
 struct Set {
 	int reds;
-	int greens;
 	int blues;
+	int greens;
 };
 
 void cleanSet(struct Set *set) {
 	set->reds = 0;
-	set->greens = 0;
 	set->blues = 0;
+	set->greens = 0;
 }
 
 
@@ -39,7 +39,6 @@ void cleanSlice(struct SetSlice *slice) {
 }
 
 
-# import <stdio.h>
 void getCubeAmmountFrom(struct SetSlice *setSlice) {
 	short j, i;
 	j = 0;
