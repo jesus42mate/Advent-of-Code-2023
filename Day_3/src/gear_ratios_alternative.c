@@ -2,9 +2,13 @@
 #include "./day3_lib.c"
 #include "./engine_parts.c"
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 
 #define LINE_LENGTH 142
+
+void printPartValue(struct Part *part);
 
 struct Line {
   char arr[LINE_LENGTH];
@@ -20,55 +24,62 @@ int main(int argc, char *argv[]) {
   char line[LINE_LENGTH];
 
   FILE *fptr;
-  fptr = fopen("input.txt", "r");
+  fptr = fopen("src/input.txt", "r");
   if (fptr == NULL) {
     perror("Failed opening file.\n");
     return -1;
   }
-  struct Box container = {};
+  struct Box box = {};
 
-  for (int l = 0; l < LINE_LENGTH; ++l) {
+  for (int lc = 0; lc < LINE_LENGTH; ++lc) {
     struct Line line;
-    container.lines[l] = line;
-    printf("%s\n", container.lines[l].arr);
+    box.lines[lc] = line;
   }
   // ----------------------
 
-  const char *one = "32";
-  char *ret = strstr(nums, one);
-  if (ret == NULL) {
-    printf("Null!");
-  } else {
-    printf("%s\n", ret);
-  }
   int line_counter = 0;
-  while (fgets(line, sizeof(line), fptr) && line_counter < 25) {
+  struct Part array_of_parts[400] = {};
+  while (fgets(line, sizeof(line), fptr) && line_counter < 1) {
 
-    struct Line *current_line = &container.lines[line_counter];
+    struct Line *current_line = &box.lines[line_counter];
     strcpy(current_line->arr, line);
 
-    printf("line[%d]: %s\n", line_counter, current_line->arr);
-    // printf("line: %s\n", line);
+    //printf("line![%d]: %s\n", line_counter, current_line->arr);
 
+    int last_part_seen_index = 0;
+
+    bool inPart = false;
+    int part_position = 0;
     for (int i = 0; i < LINE_LENGTH; ++i) {
-      // TODO: FIX THE SEGMENTATION FAULT THAT HAPPENS HERE
+      char curr = current_line->arr[i];
+      struct Part *lastPartSeen = &array_of_parts[last_part_seen_index];
 
-      // char curr = current_line->arr[i];
-      // char *ret = strstr(nums, &curr);
-      // printf("ret: %c", *ret);
-
-      // if (strstr(nums, &curr)) {
-      //   printf("Number found!: %c\n", curr);
-      // }
-      // if (curr != '.' && strstr(nums, &curr) == NULL) {
-      //   printf("%c is not inside nums\n", curr);
-      // }
-      // if (curr != '.' && strstr(nums, &curr)) {
-      //   printf("Symbol found!: %c\n", curr);
-      // }
+      if (isdigit(curr) && !inPart) {
+        inPart = true;
+        lastPartSeen->value[part_position] = curr;
+        continue;
+      } 
+      if (isdigit(curr) && inPart) {
+        ++part_position;
+        lastPartSeen->value[part_position] = curr;
+        continue;
+      }
+      if (!isdigit(curr) && inPart) {
+        inPart = false;
+        part_position = 0;
+        continue;
+      }
+      if (!isdigit(curr) && !inPart) {
+        ++last_part_seen_index;
+        continue;
+      }
     }
 
+
     ++line_counter;
+  }
+  for (int com = 0; com < 400; ++com) {
+    printPartValue(&array_of_parts[com]);
   }
 
   // ----------------------
