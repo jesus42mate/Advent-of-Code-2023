@@ -14,18 +14,32 @@ struct Symbol {
   struct Position position;
 };
 
-void checkForPartsAround(struct Symbol symbol);
+void checkForPartsAround(struct Symbol symbol, struct Position pos);
 
 struct Part {
-  int value[MAX_VALUE_LENGTH];
+  int value;
   struct Position position[];
 };
 
-void printPartValue(struct Part *part) {
-  for (int i = 0; i < sizeof(part->value); ++i) {
-    printf("%i", part->value[i]);
+struct Part setPartPosition(int x, int y, int idx, struct Part *part) {
+  part->position[idx].x = x;
+  part->position[idx].y = y;
+
+  return *part;
+}
+
+struct Part setPartValue(int val, struct Part *part) {
+  part->value = val;
+  return *part;
+}
+
+void printAllPartsFound(struct Part part[], size_t part_list_length) {
+  for (int i = 0; i < part_list_length; ++i) {
   }
-  printf("\n");
+}
+
+void printPartValue(struct Part *part) {
+  printf("%d\n", part->value);
 }
 
 struct EnginePart {
@@ -38,7 +52,7 @@ struct EnginePart makeEnginePart(struct Part *part) {
   int value_as_int = 0;
 
   for (int i = 0; i < MAX_VALUE_LENGTH; ++i) {
-    value_as_int += part->value[i];
+    value_as_int += part->value;
   }
 
   EP.value = value_as_int;
