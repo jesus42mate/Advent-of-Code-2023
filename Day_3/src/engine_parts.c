@@ -2,6 +2,16 @@
 #include <stdbool.h>
 
 #define MAX_VALUE_LENGTH 10
+#define LINE_LENGTH 141
+
+struct Line {
+  char arr[LINE_LENGTH];
+};
+
+struct Box {
+  struct Line lines[LINE_LENGTH];
+};
+
 
 char *nums = "0123456789";
 
@@ -10,51 +20,50 @@ struct Position {
   int y;
 };
 
+void printPosition(struct Position *pos) {
+  printf("[%d, %d]\n", pos->x, pos->y);
+}
+
 struct Symbol {
-  struct Position position;
+  struct Position positions;
 };
+
+bool positionsAreEqual(struct Position pos, struct Position pos2) {
+  if (pos.x == pos2.x &&
+      pos.y == pos2.y
+  ) {
+    return true;
+  }
+  return false;
+}
 
 void checkForPartsAround(struct Symbol symbol, struct Position pos);
 
 struct Part {
   int value;
-  struct Position position[];
+  bool isEnginePart;
+  struct Position positions[];
 };
 
-struct Part setPartPosition(int x, int y, int idx, struct Part *part) {
-  part->position[idx].x = x;
-  part->position[idx].y = y;
+void calculateValueAndStore(int digit, int *into, int position) {
+  if (position == 0) {
+    *into += digit;
 
-  return *part;
-}
+  } else if (position == 1) {
+    *into += digit * 10;
 
-struct Part setPartValue(int val, struct Part *part) {
-  part->value = val;
-  return *part;
-}
+  } else if (position == 2) {
+    *into += digit * 100;
 
-void printAllPartsFound(struct Part part[], size_t part_list_length) {
-  for (int i = 0; i < part_list_length; ++i) {
   }
+}
+
+void calculatePositionAndStore(int x, int y, struct Part *part, int value_index) {
+  struct Position pos = { x, y };
+  part->positions[value_index] = pos;
 }
 
 void printPartValue(struct Part *part) {
   printf("%d\n", part->value);
 }
 
-struct EnginePart {
-  int value;
-};
-
-// We don't need to calculate the value unless it is an engine part
-struct EnginePart makeEnginePart(struct Part *part) {
-  struct EnginePart EP;
-  int value_as_int = 0;
-
-  for (int i = 0; i < MAX_VALUE_LENGTH; ++i) {
-    value_as_int += part->value;
-  }
-
-  EP.value = value_as_int;
-  return EP;
-}
