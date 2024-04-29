@@ -1,12 +1,12 @@
 #include "../../src/arrays.c"
 #include "./gear_ratios_lib.c"
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
+#include <string.h>
 
 # define LINE_LENGTH 140
+
+bool is_long_enough_for_plus_three(int x);
+
 
 void lookLeft(char *line[], int x) {
   printf("passed: %s\n", line[x - 1]);
@@ -23,22 +23,6 @@ bool assert_eq(char this, char that)
   return false;
 }
 
-void setPartValue(char *buffer, char value, int pos) 
-{
-  if (pos == 0)
-  {
-    buffer[2] = value;
-  }
-  if (pos == 1)
-  {
-    buffer[1] = value;
-  }
-  if (pos == 2)
-  {
-    buffer[0] = value;
-  }
-}
-
 int main(int argc, char *argv[]) 
 {
   FILE *fptr;
@@ -49,106 +33,241 @@ int main(int argc, char *argv[])
     return -1;
   }
   char buffer[LINE_LENGTH];               // where the line read goes
-  char box   [LINE_LENGTH][LINE_LENGTH];  // where we store all lines
+  char box   [LINE_LENGTH + 1][LINE_LENGTH];  // where we store all lines
+
   // -------------------------------------------------------------------
+
   int line_number = 0;
   int curr_part[3];
 
-  while (fgets(buffer, LINE_LENGTH + 2, fptr) != NULL) 
-  {
-    for (int x = 0; x < LINE_LENGTH; ++x) 
-      box[line_number][x] = buffer[x];
-
-    printf("box[%d] :: %s\n", line_number, box[line_number]);
-    if (line_number == 0) {
-      // some tests 
-      assert_eq(box[line_number][0]  , buffer[0]);
-      assert_eq(box[line_number][13] , buffer[13]);
-      assert_eq(box[line_number][139], buffer[139]);
-      assert_eq(box[line_number][0]  , '.');
-      assert_eq(box[line_number][13] , '6');
-      assert_eq(box[line_number][139], '1');
-    }
-    ++line_number;
+  // populate the box
+  while (fgets(buffer, LINE_LENGTH + 2, fptr) != NULL) {
+    strcpy(box[line_number], buffer);
+    printf("box[%d] -> %s", line_number, box[line_number]); 
+    line_number++;
   }
+
+  int part = 0;
+  int total = 0;
 
   bool inPart = false;
   int y = 0;
   int x = 0;
-  while (y < 2)
-  {
+  while (y < 4) {
     char *cur_line = box[y];
-    char *top_line  = box[y - 1];
-    char *bot_line  = box[y + 1];
+    char *pre_line;
+    char *nex_line;
 
-    for (int i = LINE_LENGTH - 1; i >= 0; --i) 
-    {
+    if (y > 0) pre_line = box[y - 1];
+    else pre_line = NULL;
+
+    if (y < 139) nex_line = box[y + 1];
+    else nex_line = NULL;
+
+    for (int i = LINE_LENGTH - 1; i >= 0; --i) {
       x = i;
       char curr_char = cur_line[x];
 
-      if (isdigit(curr_char)) {
-        if (!inPart) {
-          inPart = true;
-          curr_part[0] = '0';
-          curr_part[1] = '0';
-          curr_part[2] = '0';
-          continue;
+      if (its_symbol(curr_char)) {
+        // check for right side numbers
+        if (isdigit(cur_line[x + 1])) {
+          part = 0;
+          if (x < 138 && isdigit(cur_line[x + 2])) {
+            if (x < 137 && isdigit(cur_line[x + 3])) {
+              part += (cur_line[x + 3]) - '0';
+              part += (cur_line[x + 2] - '0') * 10;
+              part += (cur_line[x + 1] - '0') * 100;
+              cur_line[x + 3] = '.';
+              cur_line[x + 2] = '.';
+              cur_line[x + 1] = '.';
+            } else {
+              part += (cur_line[x + 2] - '0');
+              part += (cur_line[x + 1] - '0') * 10;
+              cur_line[x + 2] = '.';
+              cur_line[x + 1] = '.';
+            }
+          } else {
+            part += ((int) cur_line[x + 1]);
+            cur_line[x + 1] = '.';
+          }
+          printf("found: %d\n", part);
+          total += part;
         }
-        if (inPart) {
-          continue;
+        // check for right side numbers
+        if (isdigit(cur_line[x - 1])) {
+          part = 0;
+          if (x > 1 && isdigit(cur_line[x - 2])) {
+            if (x > 2 && isdigit(cur_line[x - 3])) {
+              part += (cur_line[x - 1] - '0');
+              part += (cur_line[x - 2] - '0') * 10;
+              part += (cur_line[x - 3] - '0') * 100;
+              cur_line[x - 1] = '.';
+              cur_line[x - 2] = '.';
+              cur_line[x - 3] = '.';
+            } else {
+              part += (cur_line[x - 1] - '0');
+              part += (cur_line[x - 2] - '0') * 10;
+              cur_line[x - 1] = '.';
+              cur_line[x - 2] = '.';
+            }
+          } else {
+            part += ((int) cur_line[x + 1]);
+            cur_line[x + 1] = '.';
+          }
+          printf("found: %d\n", part);
+          total += part;
         }
-      } 
-      if (!isdigit(curr_char))
-      {
-        if (curr_char != '.') {
-          // it's  a symbol
-          char upright   = top_line[x + 1];
-          char upleft    = top_line[x - 1];
-          char downright = bot_line[x + 1];
-          char downleft  = bot_line[x - 1];
-          char left      = cur_line[x - 1];
-          char right     = cur_line[x + 1];
-          printf("symbol: %c\n", box[y][x]);
-          if (isdigit(upright)) {  // up-right
-            int part[3];
-            int p1 = 0;
-            int p2 = 0;
-            int p3 = 0;
 
-            if (isdigit(top_line[x + 2]) && isdigit(top_line[x + 3])) {
-              p3 = top_line[x + 3];
-              p2 = top_line[x + 2] * 10;
-              p1 = top_line[x + 1] * 100;
-            }
-            if (isdigit(top_line[x + 2]) && isdigit(top_line[x])) {
-              p3 = top_line[x + 2];
-              p2 = top_line[x + 1] * 10;
-              p1 = top_line[x    ] * 100;
-            }
-            if (isdigit(top_line[x - 1]) && isdigit(top_line[x])) {
-              p3 = top_line[x + 1];
-              p2 = top_line[x    ] * 10;
-              p1 = top_line[x - 1] * 100;
-            }
-            // remove the digits from the box so that it can't be loaded again
-          } 
-          if (isdigit(box[y + 1][x - 1])) {
+        if (isdigit(pre_line[x])) {
+          if (isdigit(pre_line[x - 1]) && isdigit(pre_line[x + 1])) {
+            part = 0;
+            printf("at: (%d:%d)\n", x, y);
+            part += (pre_line[x + 1] - '0');
+            part += (pre_line[x    ] - '0') * 10;
+            part += (pre_line[x - 1] - '0') * 100;
+            pre_line[x + 1] = '.' ;
+            pre_line[x]     = '.' ;
+            pre_line[x - 1] = '.' ;
+            printf("found: %d\n", part);
+            total += part;
+          }
+          if (isdigit(pre_line[x - 1]) && isdigit(pre_line[x - 2])) {
+            part = 0;
+            part += (pre_line[x] - '0');
+            part += (pre_line[x - 1] - '0') * 10;
+            part += (pre_line[x - 2] - '0') * 100;
+            pre_line[x]     = '.';
+            pre_line[x - 1] = '.';
+            pre_line[x - 2] = '.';
+            printf("found: %d\n", part);
+            total += part;
+          }
+          if (isdigit(pre_line[x + 1]) && isdigit(pre_line[x + 2])) {
+            part = 0;
+            part += (pre_line[x + 2] - '0');
+            part += (pre_line[x + 1] - '0') * 10;
+            part += (pre_line[x]     - '0') * 100;
+            pre_line[x]     = '.';
+            pre_line[x + 1] = '.';
+            pre_line[x + 2] = '.';
+            printf("found: %d\n", part);
+            total += part;
           }
         }
-        if (!inPart) {
-          continue;
+        if (isdigit(nex_line[x])) {
+          part = 0;
+          if (isdigit(nex_line[x - 1]) && isdigit(nex_line[x + 1])) {
+            part += (nex_line[x + 1] - '0');
+            part += (nex_line[x    ] - '0') * 10;
+            part += (nex_line[x - 1] - '0') * 100;
+            nex_line[x + 1] = '.' ;
+            nex_line[x]     = '.' ;
+            nex_line[x - 1] = '.' ;
+            printf("found: %d\n", part);
+            total += part;
+          }
+          if (isdigit(nex_line[x - 1]) && isdigit(nex_line[x - 2])) {
+            part += (nex_line[x] - '0');
+            part += (nex_line[x - 1] - '0') * 10;
+            part += (nex_line[x - 2] - '0') * 100;
+            nex_line[x]     = '.';
+            nex_line[x - 1] = '.';
+            nex_line[x - 2] = '.';
+            printf("found: %d\n", part);
+            total += part;
+          }
+          if (isdigit(nex_line[x + 1]) && isdigit(nex_line[x + 2])) {
+            part += (nex_line[x + 2] - '0');
+            part += (nex_line[x + 1] - '0') * 10;
+            part += (nex_line[x]     - '0') * 100;
+            nex_line[x]     = '.';
+            nex_line[x + 1] = '.';
+            nex_line[x + 2] = '.';
+            printf("found: %d\n", part);
+            total += part;
+          }
         }
-        if (inPart) {
-          continue;
+        if (x < 136) {
+          if (
+            isdigit(pre_line[x + 1]) &&
+            isdigit(pre_line[x + 2]) &&
+            isdigit(pre_line[x + 3]))
+          {
+            part = 0;
+            part += (pre_line[x + 3] - '0');
+            part += (pre_line[x + 2] - '0') * 10;
+            part += (pre_line[x + 1] - '0') * 100;
+            pre_line[x + 3] = '.';
+            pre_line[x + 2] = '.';
+            pre_line[x + 1] = '.';
+            printf("found: %d\n", part);
+            total += part;
+          }
+          if (
+            isdigit(nex_line[x + 1]) &&
+            isdigit(nex_line[x + 2]) &&
+            isdigit(nex_line[x + 3]))
+          {
+            part = 0;
+            part += (nex_line[x + 3] - '0');
+            part += (nex_line[x + 2] - '0') * 10;
+            part += (nex_line[x + 1] - '0') * 100;
+            nex_line[x + 3] = '.';
+            nex_line[x + 2] = '.';
+            nex_line[x + 1] = '.';
+            printf("found: %d\n", part);
+            total += part;
+          }
         }
-
+        if (x > 2) {
+          if (
+            isdigit(pre_line[x - 1]) &&
+            isdigit(pre_line[x - 2]) &&
+            isdigit(pre_line[x - 3]))
+          {
+            part = 0;
+            part += (pre_line[x - 1] - '0');
+            part += (pre_line[x - 2] - '0') * 10;
+            part += (pre_line[x - 3] - '0') * 100;
+            pre_line[x - 1] = '.';
+            pre_line[x - 2] = '.';
+            pre_line[x - 3] = '.';
+            printf("found: %d\n", part);
+            total += part;
+          }
+          if (
+            isdigit(nex_line[x - 1]) &&
+            isdigit(nex_line[x - 2]) &&
+            isdigit(nex_line[x - 3]))
+          {
+            part = 0;
+            part += (nex_line[x - 1] - '0');
+            part += (nex_line[x - 2] - '0') * 10;
+            part += (nex_line[x - 3] - '0') * 100;
+            nex_line[x - 1] = '.';
+            nex_line[x - 2] = '.';
+            nex_line[x - 3] = '.';
+            printf("found: %d\n", part);
+            total += part;
+          }
+        }
       }
-
     }
-
     ++y;
   }
 
   // ----------------------
   fclose(fptr);
 }
+
+bool is_long_enough_for_plus_three(int x) {
+  return x <= 136 && x >= 3;
+}
+
+//  ...............
+//  ...&...........
+//  ..........%....
+//  ...............
+//  ...............
+//  ............%..
+//  ...............
