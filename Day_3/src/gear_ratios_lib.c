@@ -5,6 +5,13 @@
 #include <ctype.h>
 #import "stdbool.h"
 
+void sum_total_and_cleanup(int *part, int *total) {
+  printf("found part: %d\n", *part);
+  *total += *part;
+  *part = 0;
+  printf("total: %d\n", *total);
+}
+
 bool its_symbol(char character) {
   if (!isdigit(character) && character != '.') {
     return true;

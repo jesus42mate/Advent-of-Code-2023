@@ -7,7 +7,6 @@
 
 bool is_long_enough_for_plus_three(int x);
 
-
 void lookLeft(char *line[], int x) {
   printf("passed: %s\n", line[x - 1]);
 }
@@ -43,7 +42,8 @@ int main(int argc, char *argv[])
   // populate the box
   while (fgets(buffer, LINE_LENGTH + 2, fptr) != NULL) {
     strcpy(box[line_number], buffer);
-    printf("box[%d] -> %s", line_number, box[line_number]); 
+    if (line_number < 4) 
+      printf("box[%d] -> %s", line_number, box[line_number]); 
     line_number++;
   }
 
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
   bool inPart = false;
   int y = 0;
   int x = 0;
-  while (y < 4) {
+  while (y < 140) {
     char *cur_line = box[y];
     char *pre_line;
     char *nex_line;
@@ -69,186 +69,269 @@ int main(int argc, char *argv[])
       char curr_char = cur_line[x];
 
       if (its_symbol(curr_char)) {
-        // check for right side numbers
+        // BASIC x to x + 3 PREV
+        if (isdigit(pre_line[x]) && isdigit(pre_line[x + 1]) && isdigit(pre_line[x + 2])) {
+          part += (pre_line[x + 2] - '0') * 1;
+          part += (pre_line[x + 1] - '0') * 10;
+          part += (pre_line[x    ] - '0') * 100;
+          pre_line[x    ] = '.';
+          pre_line[x + 1] = '.';
+          pre_line[x + 2] = '.';
+          sum_total_and_cleanup(&part, &total);
+        }
+        // BASIC x to x - 3 PREV
+        if (isdigit(pre_line[x]) && isdigit(pre_line[x - 1]) && isdigit(pre_line[x - 2])) {
+          part += (pre_line[x    ] - '0') * 1;
+          part += (pre_line[x - 1] - '0') * 10;
+          part += (pre_line[x - 2] - '0') * 100;
+          pre_line[x    ] = '.';
+          pre_line[x - 1] = '.';
+          pre_line[x - 2] = '.';
+          sum_total_and_cleanup(&part, &total);
+        }
+        // BASIC x to x + 3 NEXT
+        if (isdigit(nex_line[x]) && isdigit(nex_line[x + 1]) && isdigit(nex_line[x + 2])) {
+          part += (nex_line[x + 2] - '0') * 1;
+          part += (nex_line[x + 1] - '0') * 10;
+          part += (nex_line[x    ] - '0') * 100;
+          nex_line[x    ] = '.';
+          nex_line[x + 1] = '.';
+          nex_line[x + 2] = '.';
+          sum_total_and_cleanup(&part, &total);
+        }
+        // BASIC x to x - 3 NEXT
+        if (isdigit(nex_line[x]) && isdigit(nex_line[x - 1]) && isdigit(nex_line[x - 2])) {
+          part += (nex_line[x    ] - '0') * 1;
+          part += (nex_line[x - 1] - '0') * 10;
+          part += (nex_line[x - 2] - '0') * 100;
+          nex_line[x    ] = '.';
+          nex_line[x - 1] = '.';
+          nex_line[x - 2] = '.';
+          sum_total_and_cleanup(&part, &total);
+        }
+        // BASIC THREE PREVIOUS LINE
+        if (isdigit(pre_line[x])) {
+          if (isdigit(pre_line[x + 1]) && isdigit(pre_line[x - 1])) {
+            part += (pre_line[x + 1] - '0') * 1;
+            part += (pre_line[x    ] - '0') * 10;
+            part += (pre_line[x - 1] - '0') * 100;
+            pre_line[x + 1] = '.';
+            pre_line[x    ] = '.';
+            pre_line[x - 1] = '.';
+            sum_total_and_cleanup(&part, &total);
+          }
+        }
+        // BASIC THREE NEXT LINE
+        if (isdigit(nex_line[x])) {
+          if (isdigit(nex_line[x + 1]) && isdigit(nex_line[x - 1])) {
+            part += (nex_line[x + 1] - '0') * 1;
+            part += (nex_line[x    ] - '0') * 10;
+            part += (nex_line[x - 1] - '0') * 100;
+            nex_line[x + 1] = '.';
+            nex_line[x    ] = '.';
+            nex_line[x - 1] = '.';
+            sum_total_and_cleanup(&part, &total);
+          }
+        }
+        // BASIC CASES -1 AND -2 ONLY
+        if (
+          isdigit(pre_line[x]) &&
+          isdigit(pre_line[x - 1]) && 
+          !isdigit(pre_line[x - 2])
+        ) {
+          part += (pre_line[x] - '0') * 1;
+          part += (pre_line[x - 1] - '0') * 10;
+          pre_line[x] = '.';
+          pre_line[x - 1] = '.';
+          sum_total_and_cleanup(&part, &total);
+
+        }
+        if (
+          isdigit(nex_line[x]) &&
+          isdigit(nex_line[x - 1]) && 
+          !isdigit(nex_line[x - 2])
+        ) {
+          part += (nex_line[x] - '0') * 1;
+          part += (nex_line[x - 1] - '0') * 10;
+          nex_line[x] = '.';
+          nex_line[x - 1] = '.';
+          sum_total_and_cleanup(&part, &total);
+        }
+        // BASIC CASES +1 AND +2 ONLY
+        if (
+          isdigit(pre_line[x]) &&
+          isdigit(pre_line[x + 1]) && 
+          !isdigit(pre_line[x + 2])
+        ) {
+          part += (pre_line[x] - '0') * 1;
+          part += (pre_line[x + 1] - '0') * 10;
+          pre_line[x] = '.';
+          pre_line[x + 1] = '.';
+          sum_total_and_cleanup(&part, &total);
+
+        }
+        if (
+          isdigit(nex_line[x]) &&
+          isdigit(nex_line[x + 1]) && 
+          !isdigit(nex_line[x + 2])
+        ) {
+          part += (nex_line[x] - '0') * 1;
+          part += (nex_line[x + 1] - '0') * 10;
+          nex_line[x] = '.';
+          nex_line[x + 1] = '.';
+          sum_total_and_cleanup(&part, &total);
+        }
+
+        // PREV LINE +1 +2 AND +3
+        if (isdigit(pre_line[x + 1])) {
+          if (x < 138 && isdigit(pre_line[x + 2])) {
+            if (x < 137 && isdigit(pre_line[x + 3])) {
+              part += (pre_line[x + 3] - '0') * 1;
+              part += (pre_line[x + 2] - '0') * 10;
+              part += (pre_line[x + 1] - '0') * 100;
+              cur_line[x + 3] = '.';
+              cur_line[x + 2] = '.';
+              cur_line[x + 1] = '.';
+              sum_total_and_cleanup(&part, &total);
+            } else {
+              part += (pre_line[x + 2] - '0') * 1;
+              part += (pre_line[x + 1] - '0') * 10;
+              cur_line[x + 2] = '.';
+              cur_line[x + 1] = '.';
+              sum_total_and_cleanup(&part, &total);
+            }
+          } else {
+            part += (pre_line[x + 1] - '0');
+            pre_line[x + 1] = '.';
+            sum_total_and_cleanup(&part, &total);
+          }
+        }
+        // MIDDLE LINE +1 +2 AND +3
         if (isdigit(cur_line[x + 1])) {
-          part = 0;
           if (x < 138 && isdigit(cur_line[x + 2])) {
             if (x < 137 && isdigit(cur_line[x + 3])) {
-              part += (cur_line[x + 3]) - '0';
+              part += (cur_line[x + 3] - '0') * 1;
               part += (cur_line[x + 2] - '0') * 10;
               part += (cur_line[x + 1] - '0') * 100;
               cur_line[x + 3] = '.';
               cur_line[x + 2] = '.';
               cur_line[x + 1] = '.';
+              sum_total_and_cleanup(&part, &total);
             } else {
               part += (cur_line[x + 2] - '0');
               part += (cur_line[x + 1] - '0') * 10;
               cur_line[x + 2] = '.';
               cur_line[x + 1] = '.';
+              sum_total_and_cleanup(&part, &total);
             }
           } else {
-            part += ((int) cur_line[x + 1]);
+            part += cur_line[x + 1] - '0';
             cur_line[x + 1] = '.';
-          }
-          printf("found: %d\n", part);
-          total += part;
-        }
-        // check for right side numbers
-        if (isdigit(cur_line[x - 1])) {
-          part = 0;
-          if (x > 1 && isdigit(cur_line[x - 2])) {
-            if (x > 2 && isdigit(cur_line[x - 3])) {
-              part += (cur_line[x - 1] - '0');
-              part += (cur_line[x - 2] - '0') * 10;
-              part += (cur_line[x - 3] - '0') * 100;
-              cur_line[x - 1] = '.';
-              cur_line[x - 2] = '.';
-              cur_line[x - 3] = '.';
-            } else {
-              part += (cur_line[x - 1] - '0');
-              part += (cur_line[x - 2] - '0') * 10;
-              cur_line[x - 1] = '.';
-              cur_line[x - 2] = '.';
-            }
-          } else {
-            part += ((int) cur_line[x + 1]);
-            cur_line[x + 1] = '.';
+            sum_total_and_cleanup(&part, &total);
           }
           printf("found: %d\n", part);
           total += part;
         }
 
-        if (isdigit(pre_line[x])) {
-          if (isdigit(pre_line[x - 1]) && isdigit(pre_line[x + 1])) {
-            part = 0;
-            printf("at: (%d:%d)\n", x, y);
-            part += (pre_line[x + 1] - '0');
-            part += (pre_line[x    ] - '0') * 10;
-            part += (pre_line[x - 1] - '0') * 100;
-            pre_line[x + 1] = '.' ;
-            pre_line[x]     = '.' ;
-            pre_line[x - 1] = '.' ;
-            printf("found: %d\n", part);
-            total += part;
-          }
-          if (isdigit(pre_line[x - 1]) && isdigit(pre_line[x - 2])) {
-            part = 0;
-            part += (pre_line[x] - '0');
-            part += (pre_line[x - 1] - '0') * 10;
-            part += (pre_line[x - 2] - '0') * 100;
-            pre_line[x]     = '.';
-            pre_line[x - 1] = '.';
-            pre_line[x - 2] = '.';
-            printf("found: %d\n", part);
-            total += part;
-          }
-          if (isdigit(pre_line[x + 1]) && isdigit(pre_line[x + 2])) {
-            part = 0;
-            part += (pre_line[x + 2] - '0');
-            part += (pre_line[x + 1] - '0') * 10;
-            part += (pre_line[x]     - '0') * 100;
-            pre_line[x]     = '.';
-            pre_line[x + 1] = '.';
-            pre_line[x + 2] = '.';
-            printf("found: %d\n", part);
-            total += part;
-          }
-        }
-        if (isdigit(nex_line[x])) {
-          part = 0;
-          if (isdigit(nex_line[x - 1]) && isdigit(nex_line[x + 1])) {
+        // NEXT LINE +1 +2 AND +3
+        if (isdigit(nex_line[x + 1])) {
+          if (x < 138 && isdigit(nex_line[x + 2])) {
+            if (x < 137 && isdigit(nex_line[x + 3])) {
+              part += (nex_line[x + 3] - '0') * 1;
+              part += (nex_line[x + 2] - '0') * 10;
+              part += (nex_line[x + 1] - '0') * 100;
+              cur_line[x + 3] = '.';
+              cur_line[x + 2] = '.';
+              cur_line[x + 1] = '.';
+              sum_total_and_cleanup(&part, &total);
+            } else {
+              part += (nex_line[x + 2] - '0') * 1;
+              part += (nex_line[x + 1] - '0') * 10;
+              cur_line[x + 2] = '.';
+              cur_line[x + 1] = '.';
+              sum_total_and_cleanup(&part, &total);
+            }
+          } else {
             part += (nex_line[x + 1] - '0');
-            part += (nex_line[x    ] - '0') * 10;
-            part += (nex_line[x - 1] - '0') * 100;
-            nex_line[x + 1] = '.' ;
-            nex_line[x]     = '.' ;
-            nex_line[x - 1] = '.' ;
-            printf("found: %d\n", part);
-            total += part;
-          }
-          if (isdigit(nex_line[x - 1]) && isdigit(nex_line[x - 2])) {
-            part += (nex_line[x] - '0');
-            part += (nex_line[x - 1] - '0') * 10;
-            part += (nex_line[x - 2] - '0') * 100;
-            nex_line[x]     = '.';
-            nex_line[x - 1] = '.';
-            nex_line[x - 2] = '.';
-            printf("found: %d\n", part);
-            total += part;
-          }
-          if (isdigit(nex_line[x + 1]) && isdigit(nex_line[x + 2])) {
-            part += (nex_line[x + 2] - '0');
-            part += (nex_line[x + 1] - '0') * 10;
-            part += (nex_line[x]     - '0') * 100;
-            nex_line[x]     = '.';
             nex_line[x + 1] = '.';
-            nex_line[x + 2] = '.';
-            printf("found: %d\n", part);
-            total += part;
+            sum_total_and_cleanup(&part, &total);
           }
         }
-        if (x < 136) {
-          if (
-            isdigit(pre_line[x + 1]) &&
-            isdigit(pre_line[x + 2]) &&
-            isdigit(pre_line[x + 3]))
-          {
-            part = 0;
-            part += (pre_line[x + 3] - '0');
-            part += (pre_line[x + 2] - '0') * 10;
-            part += (pre_line[x + 1] - '0') * 100;
-            pre_line[x + 3] = '.';
-            pre_line[x + 2] = '.';
-            pre_line[x + 1] = '.';
-            printf("found: %d\n", part);
-            total += part;
-          }
-          if (
-            isdigit(nex_line[x + 1]) &&
-            isdigit(nex_line[x + 2]) &&
-            isdigit(nex_line[x + 3]))
-          {
-            part = 0;
-            part += (nex_line[x + 3] - '0');
-            part += (nex_line[x + 2] - '0') * 10;
-            part += (nex_line[x + 1] - '0') * 100;
-            nex_line[x + 3] = '.';
-            nex_line[x + 2] = '.';
-            nex_line[x + 1] = '.';
-            printf("found: %d\n", part);
-            total += part;
-          }
-        }
-        if (x > 2) {
-          if (
-            isdigit(pre_line[x - 1]) &&
-            isdigit(pre_line[x - 2]) &&
-            isdigit(pre_line[x - 3]))
-          {
-            part = 0;
+
+        // PREV LINE -1 -2 AND -3
+        if (isdigit(pre_line[x - 1])) {
+          if (x > 1 && isdigit(pre_line[x - 2])) {
+            if (x > 2 && isdigit(pre_line[x - 3])) {
+              part += (pre_line[x - 1] - '0') * 1;
+              part += (pre_line[x - 2] - '0') * 10;
+              part += (pre_line[x - 3] - '0') * 100;
+              pre_line[x - 1] = '.';
+              pre_line[x - 2] = '.';
+              pre_line[x - 3] = '.';
+              sum_total_and_cleanup(&part, &total);
+            } else {
+              part += (pre_line[x - 1] - '0') * 1;
+              part += (pre_line[x - 2] - '0') * 10;
+              pre_line[x - 1] = '.';
+              pre_line[x - 2] = '.';
+              sum_total_and_cleanup(&part, &total);
+            }
+          } else {
             part += (pre_line[x - 1] - '0');
-            part += (pre_line[x - 2] - '0') * 10;
-            part += (pre_line[x - 3] - '0') * 100;
             pre_line[x - 1] = '.';
-            pre_line[x - 2] = '.';
-            pre_line[x - 3] = '.';
-            printf("found: %d\n", part);
-            total += part;
+            sum_total_and_cleanup(&part, &total);
           }
-          if (
-            isdigit(nex_line[x - 1]) &&
-            isdigit(nex_line[x - 2]) &&
-            isdigit(nex_line[x - 3]))
-          {
-            part = 0;
+        }
+
+        // MIDDLE LINE -1 -2 AND -3
+        if (isdigit(cur_line[x - 1])) {
+          if (x > 1 && isdigit(cur_line[x - 2])) {
+            if (x > 2 && isdigit(cur_line[x - 3])) {
+              part += (cur_line[x - 1] - '0') * 1;
+              part += (cur_line[x - 2] - '0') * 10;
+              part += (cur_line[x - 3] - '0') * 100;
+              cur_line[x - 1] = '.';
+              cur_line[x - 2] = '.';
+              cur_line[x - 3] = '.';
+              sum_total_and_cleanup(&part, &total);
+            } else {
+              part += (cur_line[x - 1] - '0');
+              part += (cur_line[x - 2] - '0') * 10;
+              cur_line[x - 1] = '.';
+              cur_line[x - 2] = '.';
+              sum_total_and_cleanup(&part, &total);
+            }
+          } else {
+            part += cur_line[x - 1] - '0';
+            cur_line[x - 1] = '.';
+            sum_total_and_cleanup(&part, &total);
+          }
+          printf("found: %d\n", part);
+          total += part;
+        }
+        
+        // NEXT LINE -1 -2 AND -3
+        if (isdigit(nex_line[x - 1])) {
+          if (x < 138 && isdigit(nex_line[x - 2])) {
+            if (x < 137 && isdigit(nex_line[x - 3])) {
+              part += (nex_line[x - 1] - '0') * 1;
+              part += (nex_line[x - 2] - '0') * 10;
+              part += (nex_line[x - 3] - '0') * 100;
+              cur_line[x - 1] = '.';
+              cur_line[x - 2] = '.';
+              cur_line[x - 3] = '.';
+              sum_total_and_cleanup(&part, &total);
+            } else {
+              part += (nex_line[x - 1] - '0') * 1;
+              part += (nex_line[x - 2] - '0') * 10;
+              cur_line[x - 1] = '.';
+              cur_line[x - 2] = '.';
+              sum_total_and_cleanup(&part, &total);
+            }
+          } else {
             part += (nex_line[x - 1] - '0');
-            part += (nex_line[x - 2] - '0') * 10;
-            part += (nex_line[x - 3] - '0') * 100;
             nex_line[x - 1] = '.';
-            nex_line[x - 2] = '.';
-            nex_line[x - 3] = '.';
-            printf("found: %d\n", part);
-            total += part;
+            sum_total_and_cleanup(&part, &total);
           }
         }
       }
