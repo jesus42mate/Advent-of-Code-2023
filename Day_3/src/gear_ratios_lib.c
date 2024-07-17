@@ -6,10 +6,52 @@
 #import "stdbool.h"
 
 void sum_total_and_cleanup(int *part, int *total) {
-  printf("found part: %d\n", *part);
+  //printf("part: %d + %d = %d\n", *part, *total, *total + *part);
   *total += *part;
   *part = 0;
-  printf("total: %d\n", *total);
+}
+
+struct Line {
+  char data[140];
+};
+
+struct Box {
+  struct Line lines[140];
+  int len;
+};
+
+
+struct Line create_line() {
+  struct Line line = {};
+  for (int k = 0; k < 140; k++) {
+    line.data[k] = '.';
+  }
+  return line;
+}
+
+void print_line(struct Line *line, size_t line_size, int line_number) {
+  printf("\t");
+  for (int i = 0; i < line_size; i++) {
+    printf("%c", line->data[i]);
+  }
+  printf("\n");
+}
+
+void populate_box(struct Box *box) {
+  for (int i = 0; i < 140; i++) {
+    box->lines[i] = create_line();
+  }
+}
+
+void print_box(struct Box* box, int row_range) {
+  if (row_range > box->len) return;
+  for (int line_number = 0; line_number < row_range; line_number++) {
+    struct Line* curr_line = &box->lines[line_number];
+    print_line(curr_line, sizeof(curr_line->data), line_number);
+
+    for (int index = 0; index < 140; index++) {
+    }
+  }
 }
 
 bool its_symbol(char character) {
